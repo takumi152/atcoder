@@ -1,3 +1,6 @@
 *.txt
 *.exe
 temp.*
+*.out
+*.stackdump
+*.swp
