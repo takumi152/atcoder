@@ -1,3 +1,5 @@
+// WIP
+
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -16,7 +18,7 @@ int main() {
   cin >> H >> W >> A >> B;
 
   vector<vector<int> > board(H, vector<int>(W));
-  
+
 
 
   return 0;
