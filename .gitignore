@@ -4,5 +4,3 @@ temp.*
 *.out
 *.stackdump
 *.swp
-
-/past*
