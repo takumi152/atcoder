@@ -1,42 +1,83 @@
-// C++14 implemention of abc128e.py
-// still TLE
-
 #include <iostream>
+#include <vector>
 #include <algorithm>
-#include <tuple>
+#include <utility>
+#include <string>
+#include <queue>
+#include <stack>
+#include <unordered_set>
 
 using namespace std;
 
-typedef tuple<int, int, int> Ti3;
+typedef long long int ll;
+typedef pair<int, int> Pii;
 
-int N, Q;
-Ti3 XST[200010];
-int D[200010];
-int dist[200010];
+const ll mod = 1000000007;
 
 int main() {
   cin.tie(0);
   ios::sync_with_stdio(false);
-  cin >> N >> Q;
-  for (int i = 0; i < N; i++) {
-    int S, T, X;
-    cin >> S >> T >> X;
-    XST[i] = make_tuple(X, S - X, T - X);
+
+  int n, q;
+  cin >> n >> q;
+  vector<vector<int> > stx(n, vector<int>(3));
+  for (auto &x: stx) cin >> x[0] >> x[1] >> x[2];
+  vector<int> d(q);
+  for (auto &x: d) cin >> x;
+
+  for (auto &x: stx) {
+    x[0] -= x[2];
+    x[1] -= x[2];
   }
-  for (int i = 0; i < Q; i++) {
-    cin >> D[i];
-    dist[i] = -1;
+
+  vector<int> time, pos;
+  priority_queue<Pii, vector<Pii>, greater<Pii> > pque;
+  priority_queue<int, vector<int>, greater<int> > watching;
+  unordered_set<int> roadblock;
+  for (auto &x: stx) {
+    pque.emplace(x[0], x[2]);
+    pque.emplace(x[1], x[2]);
   }
-  sort(XST, XST+N);
-  for (int i = 0; i < N; i++) {
-    int point_begin = distance(D, lower_bound(D, D+Q, get<1>(XST[i])));
-    int point_end = distance(D, lower_bound(D, D+Q, get<2>(XST[i])));
-    for (int point = point_begin; point < point_end; point++) {
-      if (dist[point] == -1) dist[point] = get<0>(XST[i]);
+  int lastTime = -1000000007;
+  while (!pque.empty()) {
+    auto now = pque.top();
+    pque.pop();
+    if (now.first > lastTime) {
+      while (!watching.empty()) {
+        auto next = watching.top();
+        if (roadblock.find(next) == roadblock.end()) watching.pop();
+        else break;
+      }
+      if (watching.empty()) {
+        time.push_back(lastTime);
+        pos.push_back(-1);
+      }
+      else {
+        auto next = watching.top();
+        time.push_back(lastTime);
+        pos.push_back(next);
+      }
+      lastTime = now.first;
+    }
+    if (roadblock.find(now.second) == roadblock.end()) {
+      roadblock.insert(now.second);
+      watching.push(now.second);
+    }
+    else {
+      roadblock.erase(now.second);
     }
   }
-  for (int i = 0; i < Q; i++) {
-    cout << dist[i] << endl;
+  time.push_back(lastTime);
+  pos.push_back(-1);
+
+  vector<int> ans(q);
+  for (int i = 0; i < q; i++) {
+    auto it = upper_bound(time.begin(), time.end(), d[i]);
+    int idx = distance(time.begin(), it) - 1;
+    ans[i] = pos[idx];
   }
+
+  for (auto &x: ans) cout << x << endl;
+
   return 0;
 }
