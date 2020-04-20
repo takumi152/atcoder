@@ -4,6 +4,7 @@
 #include <map>
 #include <utility>
 #include <stack>
+#include <queue>
 
 using namespace std;
 
@@ -14,52 +15,44 @@ int main() {
   cin.tie(0);
   ios::sync_with_stdio(false);
 
-  int N;
-  cin >> N;
-  map<int, vector<Pii> > edge;
-  for (int i = 0; i < N; i++) edge[i] = vector<Pii>();
-  for (int i = 0; i < N-1; i++) {
+  int n;
+  cin >> n;
+  vector<vector<pair<int, ll> > > edge(n);
+  for (int i = 0; i < n-1; i++) {
     int a, b, c;
     cin >> a >> b >> c;
-    edge[a-1].push_back(Pii(b-1, c)); // zero index
-    edge[b-1].push_back(Pii(a-1, c)); // zero index
+    edge[a-1].emplace_back(b-1, c);
+    edge[b-1].emplace_back(a-1, c);
   }
-  int Q, K;
-  cin >> Q >> K;
-  K--; // zero index
-  vector<Pii> query;
-  for (int i = 0; i < Q; i++) {
-    int x, y;
-    cin >> x >> y;
-    query.push_back(Pii(x-1, y-1)); // zero index
+  int q, k;
+  cin >> q >> k;
+  k--;
+  vector<int> x(q), y(q);
+  for (int i = 0; i < q; i++) {
+    cin >> x[i] >> y[i];
+    x[i]--;
+    y[i]--;
   }
 
-  vector<ll> distFromK;
-  vector<bool> visited;
-  for (int i = 0; i < N; i++) {
-    distFromK.push_back(0);
-    visited.push_back(false);
-  }
-  stack<int> s;
-  s.push(K);
-  while (s.size() > 0) {
-    int now = s.top();
-    s.pop();
-    for (auto& x : edge[now]) {
-      if (!visited[x.first]) {
-        distFromK[x.first] = distFromK[now] + x.second;
-        s.push(x.first);
-      }
+  vector<ll> distanceToK(n);
+  vector<bool> visited(n);
+  queue<pair<int, ll> > que;
+  que.emplace(k, 0);
+  while (!que.empty()) {
+    auto now = que.front();
+    que.pop();
+    if (visited[now.first]) continue;
+    visited[now.first] = true;
+    distanceToK[now.first] = now.second;
+    for (auto &z: edge[now.first]) {
+      if (!visited[z.first]) que.emplace(z.first, now.second + z.second);
     }
-    visited[now] = true;
-  }
-  vector<ll> ans;
-  for (int i = 0; i < Q; i++) {
-    ans.push_back(distFromK[query[i].first] + distFromK[query[i].second]);
   }
 
-  for (int i = 0; i < Q; i++) {
-    cout << ans[i] << endl;
-  }
+  vector<ll> ans(q);
+  for (int i = 0; i < q; i++) ans[i] = distanceToK[x[i]] + distanceToK[y[i]];
+
+  for (auto &z: ans) cout << z << endl;
+
   return 0;
 }
