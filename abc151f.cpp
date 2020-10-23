@@ -18,7 +18,7 @@ struct xorshift64 {
   inline unsigned int nextUShortMod(unsigned long long int mod) {
     x = x ^ (x << 7);
     x = x ^ (x >> 9);
-    return ((x & 0x000000000000ffff) * mod) >> 48;
+    return ((x & 0x0000ffffffffffff) * mod) >> 48;
   }
   inline unsigned int nextUInt() {
     x = x ^ (x << 7);
