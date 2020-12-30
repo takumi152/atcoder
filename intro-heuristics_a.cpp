@@ -16,6 +16,8 @@
 #include <cmath>
 #include <cassert>
 
+#include <x86intrin.h>
+
 struct xorshift64 {
   unsigned long long int x = 88172645463325252ULL;
   inline unsigned short nextUShort() {
@@ -233,6 +235,24 @@ void greedySelect4() {
   contests = bestResult;
 }
 
+inline void update_before_array(int day, int con) {
+  for (int i = day; i < d; i++) {
+    happiness_before[con][i+1] = happiness[con][i+1];
+  }
+  for (int i = day; i < d; i++) {
+    last_before[con][i+1] = last[con][i+1];
+  }
+}
+
+inline void rollback_before_array(int day, int con) {
+  for (int i = day; i < d; i++) {
+    happiness[con][i+1] = happiness_before[con][i+1];
+  }
+  for (int i = day; i < d; i++) {
+    last[con][i+1] = last_before[con][i+1];
+  }
+}
+
 int main() {
   cin.tie(0);
   ios::sync_with_stdio(false);
@@ -284,12 +304,8 @@ int main() {
 
       if (score >= lastScore) {
         lastScore = score;
-        for (int i = day; i < d; i++) {
-          last_before[contest_before][i+1] = last[contest_before][i+1];
-          happiness_before[contest_before][i+1] = happiness[contest_before][i+1];
-          last_before[con][i+1] = last[con][i+1];
-          happiness_before[con][i+1] = happiness[con][i+1];
-        }
+        update_before_array(day, con);
+        update_before_array(day, contest_before);
         if (score > bestScore) {
           bestScore = score;
           contests_best = contests;
@@ -297,21 +313,13 @@ int main() {
       }
       else if (theRandom.nextDouble() < exp(double(score - lastScore) / temperature)) { // accept
         lastScore = score;
-        for (int i = day; i < d; i++) {
-          last_before[contest_before][i+1] = last[contest_before][i+1];
-          happiness_before[contest_before][i+1] = happiness[contest_before][i+1];
-          last_before[con][i+1] = last[con][i+1];
-          happiness_before[con][i+1] = happiness[con][i+1];
-        }
+        update_before_array(day, con);
+        update_before_array(day, contest_before);
       }
       else { // rollback
         contests[day] = contest_before;
-        for (int i = day; i < d; i++) {
-          last[contest_before][i+1] = last_before[contest_before][i+1];
-          happiness[contest_before][i+1] = happiness_before[contest_before][i+1];
-          last[con][i+1] = last_before[con][i+1];
-          happiness[con][i+1] = happiness_before[con][i+1];
-        }
+        rollback_before_array(day, con);
+        rollback_before_array(day, contest_before);
         score = lastScore;
       }
     }
@@ -342,28 +350,14 @@ int main() {
       if (score >= lastScore) {
         lastScore = score;
         if (day1 < day2) {
-          for (int i = day1; i < d; i++) {
-            last_before[contest_before1][i+1] = last[contest_before1][i+1];
-            happiness_before[contest_before1][i+1] = happiness[contest_before1][i+1];
-            last_before[con1][i+1] = last[con1][i+1];
-            happiness_before[con1][i+1] = happiness[con1][i+1];
-          }
-          for (int i = day2; i < d; i++) {
-            last_before[contest_before2][i+1] = last[contest_before2][i+1];
-            happiness_before[contest_before2][i+1] = happiness[contest_before2][i+1];
-          }
+          update_before_array(day1, con1);
+          update_before_array(day1, contest_before1);
+          update_before_array(day2, contest_before2);
         }
         else {
-          for (int i = day1; i < d; i++) {
-            last_before[con1][i+1] = last[con1][i+1];
-            happiness_before[con1][i+1] = happiness[con1][i+1];
-          }
-          for (int i = day2; i < d; i++) {
-            last_before[contest_before2][i+1] = last[contest_before2][i+1];
-            happiness_before[contest_before2][i+1] = happiness[contest_before2][i+1];
-            last_before[con2][i+1] = last[con2][i+1];
-            happiness_before[con2][i+1] = happiness[con2][i+1];
-          }
+          update_before_array(day1, con1);
+          update_before_array(day2, con2);
+          update_before_array(day2, contest_before2);
         }
         if (score > bestScore) {
           bestScore = score;
@@ -373,58 +367,30 @@ int main() {
       else if (theRandom.nextDouble() < exp(double(score - lastScore) / temperature)) { // accept
         lastScore = score;
         if (day1 < day2) {
-          for (int i = day1; i < d; i++) {
-            last_before[contest_before1][i+1] = last[contest_before1][i+1];
-            happiness_before[contest_before1][i+1] = happiness[contest_before1][i+1];
-            last_before[con1][i+1] = last[con1][i+1];
-            happiness_before[con1][i+1] = happiness[con1][i+1];
-          }
-          for (int i = day2; i < d; i++) {
-            last_before[contest_before2][i+1] = last[contest_before2][i+1];
-            happiness_before[contest_before2][i+1] = happiness[contest_before2][i+1];
-          }
+          update_before_array(day1, con1);
+          update_before_array(day1, contest_before1);
+          update_before_array(day2, contest_before2);
         }
         else {
-          for (int i = day1; i < d; i++) {
-            last_before[con1][i+1] = last[con1][i+1];
-            happiness_before[con1][i+1] = happiness[con1][i+1];
-          }
-          for (int i = day2; i < d; i++) {
-            last_before[contest_before2][i+1] = last[contest_before2][i+1];
-            happiness_before[contest_before2][i+1] = happiness[contest_before2][i+1];
-            last_before[con2][i+1] = last[con2][i+1];
-            happiness_before[con2][i+1] = happiness[con2][i+1];
-          }
+          update_before_array(day1, con1);
+          update_before_array(day2, con2);
+          update_before_array(day2, contest_before2);
         }
       }
       else { // rollback
         if (day1 < day2) {
           contests[day1] = contest_before1;
-          for (int i = day1; i < d; i++) {
-            last[contest_before1][i+1] = last_before[contest_before1][i+1];
-            happiness[contest_before1][i+1] = happiness_before[contest_before1][i+1];
-            last[con1][i+1] = last_before[con1][i+1];
-            happiness[con1][i+1] = happiness_before[con1][i+1];
-          }
           contests[day2] = contest_before2;
-          for (int i = day2; i < d; i++) {
-            last[contest_before2][i+1] = last_before[contest_before2][i+1];
-            happiness[contest_before2][i+1] = happiness_before[contest_before2][i+1];
-          }
+          rollback_before_array(day1, con1);
+          rollback_before_array(day1, contest_before1);
+          rollback_before_array(day2, contest_before2);
         }
         else {
           contests[day1] = contest_before1;
-          for (int i = day1; i < d; i++) {
-            last[con1][i+1] = last_before[con1][i+1];
-            happiness[con1][i+1] = happiness_before[con1][i+1];
-          }
           contests[day2] = contest_before2;
-          for (int i = day2; i < d; i++) {
-            last[contest_before2][i+1] = last_before[contest_before2][i+1];
-            happiness[contest_before2][i+1] = happiness_before[contest_before2][i+1];
-            last[con2][i+1] = last_before[con2][i+1];
-            happiness[con2][i+1] = happiness_before[con2][i+1];
-          }
+          rollback_before_array(day1, con1);
+          rollback_before_array(day2, con2);
+          rollback_before_array(day2, contest_before2);
         }
         score = lastScore;
       }
@@ -448,12 +414,8 @@ int main() {
 
       if (score >= lastScore) {
         lastScore = score;
-        for (int i = day1; i < d; i++) {
-          last_before[contests[day1]][i+1] = last[contests[day1]][i+1];
-          happiness_before[contests[day1]][i+1] = happiness[contests[day1]][i+1];
-          last_before[contests[day2]][i+1] = last[contests[day2]][i+1];
-          happiness_before[contests[day2]][i+1] = happiness[contests[day2]][i+1];
-        }
+        update_before_array(day1, contests[day1]);
+        update_before_array(day1, contests[day2]);
         if (score > bestScore) {
           bestScore = score;
           contests_best = contests;
@@ -461,21 +423,13 @@ int main() {
       }
       else if (theRandom.nextDouble() < exp(double(score - lastScore) / temperature)) { // accept
         lastScore = score;
-        for (int i = day1; i < d; i++) {
-          last_before[contests[day1]][i+1] = last[contests[day1]][i+1];
-          happiness_before[contests[day1]][i+1] = happiness[contests[day1]][i+1];
-          last_before[contests[day2]][i+1] = last[contests[day2]][i+1];
-          happiness_before[contests[day2]][i+1] = happiness[contests[day2]][i+1];
-        }
+        update_before_array(day1, contests[day1]);
+        update_before_array(day1, contests[day2]);
       }
       else { // rollback
         swap(contests[day1], contests[day2]);
-        for (int i = day1; i < d; i++) {
-          last[contests[day1]][i+1] = last_before[contests[day1]][i+1];
-          happiness[contests[day1]][i+1] = happiness_before[contests[day1]][i+1];
-          last[contests[day2]][i+1] = last_before[contests[day2]][i+1];
-          happiness[contests[day2]][i+1] = happiness_before[contests[day2]][i+1];
-        }
+        rollback_before_array(day1, contests[day1]);
+        rollback_before_array(day1, contests[day2]);
         score = lastScore;
       }
     }
