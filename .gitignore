@@ -4,3 +4,6 @@ temp.*
 *.out
 *.stackdump
 *.swp
+*/tools
+.vscode
+.gdb_history
