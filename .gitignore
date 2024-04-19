@@ -11,3 +11,11 @@ temp.*
 *.log
 *.data
 *.data.old
+target/
+img.atcoder.jp/
+tester/
+*.class
+*.lock
+*.toml
+*.pdb
+*.md
