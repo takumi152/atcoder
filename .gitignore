@@ -5,5 +5,9 @@ temp.*
 *.stackdump
 *.swp
 */tools
+*/.ipynb_checkpoints
 .vscode
 .gdb_history
+*.log
+*.data
+*.data.old
